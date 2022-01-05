@@ -1,7 +1,8 @@
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import InputFile
 import os
 import textwrap
-
+import draw
 
 API_TOKEN = os.environ["API_TOKEN"]
 
@@ -21,6 +22,13 @@ async def handle_image(message: types.Message):
     if not message.caption:
         await message.reply("Пожалуйста пришлите эту же картинку, но с текстом")
         return
+    photo = message.photo[-1]
+    fn = f"tmp/{photo.file_unique_id}.jpg"
+    await photo.download(fn)
+    fn_meme = draw.draw_meme(fn, message.caption)
+    await message.answer_photo(InputFile(fn_meme))
+    os.remove(fn)
+    os.remove(fn_meme)
     
 
 if __name__ == '__main__':
